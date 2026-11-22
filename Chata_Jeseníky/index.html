@@ -1,0 +1,1463 @@
+<!DOCTYPE html>
+<html lang="cs" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wellness chata Relax — Ostružná | Soukromý horský objekt v Jeseníkách</title>
+    
+    <!-- Google Fonts: Cormorant Garamond & Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Leaflet.js CSS (Mapa bez API klíče) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        sandstone: '#F5F2EB',
+                        sandstoneAlt: '#EBE6DC',
+                        slateDark: '#161614',
+                        moss: '#24332A',
+                        oak: '#9C6B43',
+                        oakHover: '#825634',
+                        hairline: '#DCD6CC'
+                    },
+                    fontFamily: {
+                        serif: ['"Cormorant Garamond"', 'Georgia', 'serif'],
+                        sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif']
+                    },
+                    borderRadius: {
+                        none: '0px'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Severské barevné sladění pouze na vrstvu mapových dlaždic (pin zůstává nedotčený) */
+        .nordic-leaflet-map .leaflet-tile-pane {
+            filter: sepia(0.12) saturate(0.9) contrast(0.98) brightness(1.02);
+        }
+        .leaflet-container {
+            font-family: 'Plus Jakarta Sans', system-ui, sans-serif !important;
+            background: #EFEBE2 !important;
+        }
+        /* Skrytí spodního atribučního pruhu */
+        .leaflet-control-attribution {
+            display: none !important;
+        }
+        /* Ovládací tlačítka (+/-) v tmavě jedlové zelené #2D4234 */
+        .leaflet-control-zoom {
+            border: 1px solid rgba(255, 255, 255, 0.15) !important;
+            border-radius: 0px !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+            margin-top: 16px !important;
+            margin-left: 16px !important;
+        }
+        .leaflet-control-zoom a {
+            background-color: #2D4234 !important;
+            color: #F5F2EB !important;
+            border-bottom: 1px solid rgba(245, 242, 235, 0.18) !important;
+            border-radius: 0px !important;
+            width: 34px !important;
+            height: 34px !important;
+            line-height: 34px !important;
+            font-size: 16px !important;
+            transition: background-color 0.2s ease !important;
+        }
+        .leaflet-control-zoom a:last-child {
+            border-bottom: none !important;
+        }
+        .leaflet-control-zoom a:hover {
+            background-color: #3E5641 !important;
+            color: #FFFFFF !important;
+        }
+    </style>
+</head>
+<body class="bg-sandstone text-slateDark font-sans antialiased selection:bg-moss selection:text-sandstone">
+
+    <!-- 1. HEADER S LOGEM -->
+    <header class="sticky top-0 z-40 bg-sandstone/95 backdrop-blur-md border-b border-hairline">
+        <div class="max-w-[1440px] mx-auto px-6 lg:px-12">
+            <div class="flex justify-between items-center h-20">
+                
+                <!-- Logo v fixním rámečku w-10 h-10 -->
+                <a href="#" class="flex items-center gap-3.5 group">
+                    <div class="w-10 h-10 border border-slateDark/25 flex items-center justify-center bg-white group-hover:border-oak transition-colors shrink-0 overflow-hidden">
+                        <img 
+                            src="img/logo.webp" 
+                            alt="Logo Wellness chata Relax" 
+                            class="w-full h-full object-contain p-1"
+                        >
+                    </div>
+                    <div>
+                        <span class="font-serif text-xl sm:text-2xl tracking-tight text-slateDark font-medium block leading-none">
+                            RELAX <span class="italic font-normal text-oak">Ostružná</span>
+                        </span>
+                        <span class="text-[9px] uppercase tracking-[0.26em] text-slateDark/55 block mt-1">
+                            Wellness Chata
+                        </span>
+                    </div>
+                </a>
+
+                <!-- Navigace -->
+                <nav class="hidden lg:flex items-center gap-9 text-xs uppercase tracking-[0.17em] font-medium text-slateDark/80">
+                    <a href="#chata-zazemi" class="hover:text-oak transition-colors">Chata &amp; Zázemí</a>
+                    <a href="#galerie" class="hover:text-oak transition-colors">Galerie</a>
+                    <a href="#cenik" class="hover:text-oak transition-colors">Ceník</a>
+                    <a href="#recenze" class="hover:text-oak transition-colors">Recenze</a>
+                    <a href="#lokalita" class="hover:text-oak transition-colors">Lokalita</a>
+                </nav>
+
+                <!-- Pravé CTA -->
+                <div class="flex items-center gap-5">
+                    <a href="tel:+420775753033" class="hidden xl:inline-block text-xs tracking-[0.12em] text-slateDark/70 hover:text-slateDark transition-colors">
+                        +420 775 753 033
+                    </a>
+                    <a href="#rezervace" class="bg-slateDark hover:bg-moss text-sandstone text-xs uppercase tracking-[0.18em] font-medium px-6 py-3.5 transition-colors">
+                        Ověřit termín
+                    </a>
+                    <button id="mobile-menu-btn" type="button" class="lg:hidden p-2 text-slateDark" aria-label="Menu">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="square" d="M3 7h18M3 12h18M3 17h18"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobilní menu -->
+        <div id="mobile-menu" class="hidden lg:hidden bg-sandstone border-t border-hairline px-6 py-6 space-y-4">
+            <a href="#chata-zazemi" class="block text-xs uppercase tracking-[0.18em] text-slateDark py-1">Chata &amp; Zázemí</a>
+            <a href="#galerie" class="block text-xs uppercase tracking-[0.18em] text-slateDark py-1">Galerie</a>
+            <a href="#cenik" class="block text-xs uppercase tracking-[0.18em] text-slateDark py-1">Ceník</a>
+            <a href="#recenze" class="block text-xs uppercase tracking-[0.18em] text-slateDark py-1">Recenze</a>
+            <a href="#lokalita" class="block text-xs uppercase tracking-[0.18em] text-slateDark py-1">Lokalita</a>
+            <div class="pt-4 border-t border-hairline">
+                <a href="tel:+420775753033" class="text-xs tracking-[0.15em] text-oak font-medium">+420 775 753 033</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- 2. HERO SEKCE S ŠIROKOÚHLOU OBDÉLNÍKOVOU FOTOGRAFIÍ -->
+    <section class="pt-12 sm:pt-16 lg:pt-20 pb-16 border-b border-hairline">
+        <div class="max-w-[1440px] mx-auto px-6 lg:px-12">
+            
+            <!-- Editoriální nadpis a tlačítka -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-end mb-12">
+                <div class="lg:col-span-8">
+                    <div class="flex items-center gap-3 text-[11px] uppercase tracking-[0.22em] text-oak font-medium mb-5">
+                        <span>Jeseníky • Ostružná</span>
+                        <span class="w-8 h-[1px] bg-oak"></span>
+                        <span>Celý objekt jen pro vaši skupinu až 20 osob</span>
+                    </div>
+                    <h1 class="font-serif text-4xl sm:text-6xl lg:text-[66px] text-slateDark font-normal leading-[1.05] tracking-[-0.01em]">
+                        Soukromá wellness chata <span class="italic font-normal text-moss">v srdci Jeseníků</span>
+                    </h1>
+                </div>
+
+                <div class="lg:col-span-4 flex flex-col justify-end">
+                    <div class="flex flex-wrap items-center gap-5">
+                        <a href="#rezervace" class="bg-oak hover:bg-oakHover text-sandstone text-xs uppercase tracking-[0.2em] font-medium px-7 py-4 transition-colors">
+                            Zobrazit volné termíny
+                        </a>
+                        <a href="#chata-zazemi" class="text-xs uppercase tracking-[0.18em] text-slateDark border-b border-slateDark pb-1 hover:text-oak hover:border-oak transition-colors">
+                            Prohlédnout chatu
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Širokoúhlá obdélníková fotografie v ostrém 1px rámu -->
+            <div class="border border-slateDark/20 bg-white p-2 sm:p-3">
+                <div class="relative aspect-[16/9] lg:aspect-[21/9] w-full overflow-hidden bg-slateDark">
+                    <img 
+                        src="img/hero.webp" 
+                        alt="Wellness chata Relax v Ostružné" 
+                        class="w-full h-full object-cover object-center"
+                    >
+                    <div class="hidden sm:flex absolute bottom-5 right-5 bg-sandstone/95 backdrop-blur-sm border border-hairline px-4 py-2 text-[10px] uppercase tracking-[0.2em] text-slateDark">
+                        Privátní pronájem bez přítomnosti majitele
+                    </div>
+                </div>
+            </div>
+
+            <!-- Architektonický pruh s klíčovými parametry -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 border-x border-b border-hairline bg-white">
+                <div class="p-5 sm:p-6 border-r border-b lg:border-b-0 border-hairline">
+                    <span class="block text-[10px] uppercase tracking-[0.2em] text-slateDark/50 mb-1">Kapacita</span>
+                    <span class="font-serif text-2xl text-slateDark">Až 20 osob</span>
+                </div>
+                <div class="p-5 sm:p-6 sm:border-r border-b lg:border-b-0 border-hairline">
+                    <span class="block text-[10px] uppercase tracking-[0.2em] text-slateDark/50 mb-1">Ubytování</span>
+                    <span class="font-serif text-2xl text-slateDark">5 ložnic</span>
+                </div>
+                <div class="p-5 sm:p-6 border-r border-b sm:border-b-0 border-hairline">
+                    <span class="block text-[10px] uppercase tracking-[0.2em] text-slateDark/50 mb-1">Komfort</span>
+                    <span class="font-serif text-2xl text-slateDark">3 koupelny</span>
+                </div>
+                <div class="p-5 sm:p-6 lg:border-r border-hairline">
+                    <span class="block text-[10px] uppercase tracking-[0.2em] text-slateDark/50 mb-1">Relaxace 24/7</span>
+                    <span class="font-serif text-2xl text-slateDark">Sauna &amp; vířivka</span>
+                </div>
+                <a href="https://www.e-chalupy.cz/ubytovani-ostruzna-chata-relax-pronajmuti-o9782" target="_blank" rel="noopener noreferrer" class="block col-span-2 sm:col-span-1 p-5 sm:p-6 border-t sm:border-t-0 border-hairline bg-sandstoneAlt/40 hover:bg-sandstoneAlt transition-colors" aria-label="Hodnocení a nabídka chaty na e-chalupy.cz">
+                    <span class="block text-[10px] uppercase tracking-[0.2em] text-oak mb-1">e-chalupy.cz &nearr;</span>
+                    <span class="font-serif text-2xl text-slateDark">4,9 <span class="text-sm font-sans text-slateDark/60">/ 5 ★</span></span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. SEKCE 'CHATA & ZÁZEMÍ' (EDITORIAL SPLIT-ROWS S VELKÝMI FOTKAMI) -->
+    <section id="chata-zazemi" class="py-24 lg:py-32 border-b border-hairline">
+        <div class="max-w-[1440px] mx-auto px-6 lg:px-12">
+            
+            <!-- Úvod sekce -->
+            <div class="max-w-3xl mb-20">
+                <span class="text-[11px] uppercase tracking-[0.22em] text-oak block mb-3">Prostor &amp; Vybavení</span>
+                <h2 class="font-serif text-4xl sm:text-5xl text-slateDark font-normal leading-tight">
+                    Promyšlené zázemí pro <span class="italic">společné chvíle</span> i klidný odpočinek
+                </h2>
+            </div>
+
+            <div class="space-y-24 lg:space-y-32">
+                
+                <!-- BLOK 01: Obytná chata & 5 ložnic -->
+                <article class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
+                    <div class="lg:col-span-7">
+                        <div class="border border-hairline bg-white p-2">
+                            <div class="aspect-[16/11] overflow-hidden bg-slateDark">
+                                <img 
+                                    src="img/interier-3.webp" 
+                                    alt="Společenská místnost a ložnice chaty" 
+                                    class="w-full h-full object-cover"
+                                >
+                            </div>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-5">
+                        <span class="text-xs uppercase tracking-[0.22em] text-oak font-medium block mb-3">01 / Obytná chata &amp; 5 ložnic</span>
+                        <h3 class="font-serif text-3xl sm:text-4xl text-slateDark font-normal mb-5">
+                            Velkorysý prostor, kde se nikdo netlačí
+                        </h3>
+                        <p class="text-slateDark/75 text-sm sm:text-base font-light leading-relaxed mb-8">
+                            Srdcem domu je prostorná společenská místnost s krbem a velkým jídelním stolem pro všech 20 hostů. Zatímco dospělí posedí u krbu, děti mají vlastní hernu plnou hraček.
+                        </p>
+                        <ul class="border-t border-hairline text-sm text-slateDark/85 divide-y divide-hairline">
+                            <li class="py-3 flex justify-between gap-4">
+                                <span class="text-slateDark/55">Přízemí &amp; patro</span>
+                                <span class="font-medium text-right">3× ložnice (manželská postel + rozkl. pohovka)</span>
+                            </li>
+                            <li class="py-3 flex justify-between gap-4">
+                                <span class="text-slateDark/55">Dětská zóna</span>
+                                <span class="font-medium text-right">1× samostatný dětský pokoj + herna</span>
+                            </li>
+                            <li class="py-3 flex justify-between gap-4">
+                                <span class="text-slateDark/55">Podkroví</span>
+                                <span class="font-medium text-right">1× velká ložnice pro 6 osob</span>
+                            </li>
+                            <li class="py-3 flex justify-between gap-4">
+                                <span class="text-slateDark/55">Kuchyně &amp; koupelny</span>
+                                <span class="font-medium text-right">Plně vybavená kuchyně, 3× moderní koupelna</span>
+                            </li>
+                        </ul>
+                    </div>
+                </article>
+
+                <!-- BLOK 02: Samostatný wellness domek (obrácené pořadí na desktopu) -->
+                <article class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
+                    <div class="lg:col-span-5 order-2 lg:order-1">
+                        <span class="text-xs uppercase tracking-[0.22em] text-oak font-medium block mb-3">02 / Samostatný wellness domek</span>
+                        <h3 class="font-serif text-3xl sm:text-4xl text-slateDark font-normal mb-5">
+                            Privátní sauna a vířivka 24/7 v ceně pobytu
+                        </h3>
+                        <p class="text-slateDark/75 text-sm sm:text-base font-light leading-relaxed mb-8">
+                            Přímo na zahradě stojí samostatný wellness domek vyhrazený po celou dobu pobytu jen pro vás. Žádné rezervační hodiny ani sdílení s cizími hosty.
+                        </p>
+                        <ul class="border-t border-hairline text-sm text-slateDark/85 divide-y divide-hairline">
+                            <li class="py-3 flex justify-between gap-4">
+                                <span class="text-slateDark/55">Saunování</span>
+                                <span class="font-medium text-right">Velká finská sauna s ochlazovacím bazénkem</span>
+                            </li>
+                            <li class="py-3 flex justify-between gap-4">
+                                <span class="text-slateDark/55">Hydroterapie</span>
+                                <span class="font-medium text-right">Masážní vířivka pro 5 osob</span>
+                            </li>
+                            <li class="py-3 flex justify-between gap-4">
+                                <span class="text-slateDark/55">Relaxace</span>
+                                <span class="font-medium text-right">Klidová odpočinková zóna s lehátky</span>
+                            </li>
+                            <li class="py-3 flex justify-between gap-4">
+                                <span class="text-slateDark/55">Dostupnost</span>
+                                <span class="font-medium text-right text-moss">Neomezeně v ceně pronájmu</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="lg:col-span-7 order-1 lg:order-2">
+                        <div class="border border-hairline bg-white p-2">
+                            <div class="aspect-[16/11] overflow-hidden bg-slateDark">
+                                <img 
+                                    src="img/wellness-4.webp" 
+                                    alt="Privátní wellness domek se saunou a vířivkou" 
+                                    class="w-full h-full object-cover"
+                                >
+                            </div>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- BLOK 03: Zahrada, pergola & Jeseníky -->
+                <article class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
+                    <div class="lg:col-span-7">
+                        <div class="border border-hairline bg-white p-2">
+                            <div class="aspect-[16/11] overflow-hidden bg-slateDark">
+                                <img 
+                                    src="img/exterier-1.webp" 
+                                    alt="Zahrada chaty a horské okolí v Ostružné" 
+                                    class="w-full h-full object-cover"
+                                >
+                            </div>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-5">
+                        <span class="text-xs uppercase tracking-[0.22em] text-oak font-medium block mb-3">03 / Zahrada, pergola &amp; Jeseníky</span>
+                        <h3 class="font-serif text-3xl sm:text-4xl text-slateDark font-normal mb-5">
+                            Zahrada pro děti a sjezdovky pár minut od dveří
+                        </h3>
+                        <p class="text-slateDark/75 text-sm sm:text-base font-light leading-relaxed mb-8">
+                            Oplocená zahrada poskytuje bezpečný prostor pro hry dětí i večerní grilování pod střechou. V zimě nazujete lyže pár set metrů od chaty, v létě vyrážíte rovnou na hřebenovky.
+                        </p>
+                        <ul class="border-t border-hairline text-sm text-slateDark/85 divide-y divide-hairline">
+                            <li class="py-3 flex justify-between gap-4">
+                                <span class="text-slateDark/55">Venkovní posezení</span>
+                                <span class="font-medium text-right">Dvojitá krytá pergola s letní kuchyní a grily</span>
+                            </li>
+                            <li class="py-3 flex justify-between gap-4">
+                                <span class="text-slateDark/55">Zahrada &amp; léto</span>
+                                <span class="font-medium text-right">Ohniště, venkovní bazén, trampolína a hřiště</span>
+                            </li>
+                            <li class="py-3 flex justify-between gap-4">
+                                <span class="text-slateDark/55">Parkování</span>
+                                <span class="font-medium text-right">5 vyhrazených míst přímo u chaty zdarma</span>
+                            </li>
+                            <li class="py-3 flex justify-between gap-4">
+                                <span class="text-slateDark/55">Zimní areály</span>
+                                <span class="font-medium text-right">Ostružná (600 m), Ramzová (2 km), Petříkov (3 km)</span>
+                            </li>
+                        </ul>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. ARCHITEKTONICKÁ BENTO GALERIE S DYNAMICKÝM ROZLOŽENÍM PRO KAŽDOU KATEGORII -->
+    <section id="galerie" class="py-24 lg:py-32 border-b border-hairline bg-white">
+        <div class="max-w-[1440px] mx-auto px-6 lg:px-12">
+            
+            <!-- Záhlaví + Přepínací záložky kategorií -->
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-14">
+                <div>
+                    <span class="text-[11px] uppercase tracking-[0.22em] text-oak block mb-3">Fotogalerie</span>
+                    <h2 class="font-serif text-4xl sm:text-5xl text-slateDark font-normal">Pohled do chaty</h2>
+                </div>
+
+                <!-- Kategorie: Exteriér / Venek (výchozí), Interiér, Wellness -->
+                <div class="flex flex-wrap border border-hairline bg-sandstone" id="gallery-filters">
+                    <button type="button" data-category="exterier" class="gal-filter active px-6 py-3 text-xs uppercase tracking-[0.16em] bg-slateDark text-sandstone transition-colors">
+                        Exteriér / Venek
+                    </button>
+                    <button type="button" data-category="interier" class="gal-filter px-6 py-3 text-xs uppercase tracking-[0.16em] text-slateDark hover:bg-sandstoneAlt transition-colors border-l border-hairline">
+                        Interiér
+                    </button>
+                    <button type="button" data-category="wellness" class="gal-filter px-6 py-3 text-xs uppercase tracking-[0.16em] text-slateDark hover:bg-sandstoneAlt transition-colors border-l border-hairline">
+                        Wellness
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dynamický Bento Grid (6 fotek na kategorii, pokaždé jiná pozice hlavní fotky) -->
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-5" id="gallery-grid">
+                <!-- Generuje JavaScript podle aktivní kategorie -->
+            </div>
+        </div>
+    </section>
+
+    <!-- 5. PŘEHLEDNÝ SLOUCOVÝ BUTIKOVÝ CENÍK -->
+    <section id="cenik" class="py-24 lg:py-32 border-b border-hairline bg-sandstone">
+        <div class="max-w-[1440px] mx-auto px-6 lg:px-12">
+            
+            <div class="max-w-2xl mb-16">
+                <span class="text-[11px] uppercase tracking-[0.22em] text-oak block mb-3">Ceník pronájmu</span>
+                <h2 class="font-serif text-4xl sm:text-5xl text-slateDark font-normal mb-4">
+                    Transparentní ceny za <span class="italic">celý objekt</span>
+                </h2>
+                <p class="text-sm sm:text-base text-slateDark/75 font-light">
+                    Pronajímáte vždy celou chatu včetně wellness domku (kapacita až 20 osob), bez ohledu na počet obsazených lůžek.
+                </p>
+            </div>
+
+            <!-- 4 Architektonické sloupce sezón -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 border-t border-l border-hairline bg-white mb-12">
+                
+                <!-- Sloupec 1: Prodloužený víkend -->
+                <div class="p-8 border-r border-b border-hairline flex flex-col justify-between">
+                    <div>
+                        <span class="text-[10px] uppercase tracking-[0.2em] text-slateDark/50 block mb-2">3 noci • Celoročně (dle obsazenosti)</span>
+                        <h3 class="font-serif text-2xl text-slateDark mb-4">Prodloužený víkend</h3>
+                        <div class="font-serif text-4xl text-slateDark mb-3">26 900 Kč</div>
+                        <p class="text-xs text-slateDark/65 font-light leading-relaxed mb-6">
+                            Každá další noc za <strong class="font-medium text-slateDark">8 900 Kč</strong>. Ideální pro společný víkend s přáteli nebo rodinou.
+                        </p>
+                    </div>
+                    <a href="#rezervace" data-package="Prodloužený víkend – 3 noci" class="pricing-inquiry-btn block text-center border border-slateDark text-slateDark hover:bg-slateDark hover:text-sandstone text-[11px] uppercase tracking-[0.18em] py-3 transition-colors">
+                        Poptat víkend
+                    </a>
+                </div>
+
+                <!-- Sloupec 2: Celý týden (NEJOBLÍBENĚJŠÍ) -->
+                <div class="p-8 border-r border-b border-hairline bg-moss text-sandstone flex flex-col justify-between relative">
+                    <div>
+                        <div class="flex justify-between items-start gap-2 mb-2">
+                            <span class="text-[10px] uppercase tracking-[0.2em] text-sandstone/70">7 nocí (So – So) • Celoročně (dle obsazenosti)</span>
+                            <span class="bg-oak text-sandstone text-[9px] uppercase tracking-[0.18em] px-2.5 py-1 shrink-0">Nejoblíbenější</span>
+                        </div>
+                        <h3 class="font-serif text-2xl text-sandstone mb-4">Celý týden</h3>
+                        <div class="font-serif text-4xl text-sandstone mb-3">58 900 Kč</div>
+                        <p class="text-xs text-sandstone/80 font-light leading-relaxed mb-6">
+                            Při plné obsazenosti 20 osob vychází pobyt jen na <strong class="font-medium text-white">420 Kč / os. / noc</strong> včetně wellness.
+                        </p>
+                    </div>
+                    <a href="#rezervace" data-package="Celý týden – 7 nocí (So – So)" class="pricing-inquiry-btn block text-center bg-oak hover:bg-oakHover text-sandstone text-[11px] uppercase tracking-[0.18em] py-3 transition-colors">
+                        Poptat týdenní pobyt
+                    </a>
+                </div>
+
+                <!-- Sloupec 3: Vánoční pobyt -->
+                <div class="p-8 border-r border-b border-hairline flex flex-col justify-between">
+                    <div>
+                        <span class="text-[10px] uppercase tracking-[0.2em] text-oak font-medium block mb-2">4 noci • 22. 12. – 26. 12. 2026</span>
+                        <h3 class="font-serif text-2xl text-slateDark mb-4">Vánoční pobyt</h3>
+                        <div class="font-serif text-4xl text-slateDark mb-3">39 900 Kč</div>
+                        <p class="text-xs text-slateDark/65 font-light leading-relaxed mb-6">
+                            Svátky na horách se stromkem, vánoční výzdobou chaty a vyhřátou saunou po zimní procházce.
+                        </p>
+                    </div>
+                    <a href="#rezervace" data-from="2026-12-22" data-to="2026-12-26" data-package="Vánoční pobyt (4 noci)" class="pricing-inquiry-btn block text-center border border-slateDark text-slateDark hover:bg-slateDark hover:text-sandstone text-[11px] uppercase tracking-[0.18em] py-3 transition-colors">
+                        Poptat Vánoce
+                    </a>
+                </div>
+
+                <!-- Sloupec 4: Silvestrovský týden -->
+                <div class="p-8 border-r border-b border-hairline flex flex-col justify-between">
+                    <div>
+                        <span class="text-[10px] uppercase tracking-[0.2em] text-oak font-medium block mb-2">7 nocí • 26. 12. 2026 – 2. 1. 2027</span>
+                        <h3 class="font-serif text-2xl text-slateDark mb-4">Silvestrovský týden</h3>
+                        <div class="font-serif text-4xl text-slateDark mb-3">99 000 Kč</div>
+                        <p class="text-xs text-slateDark/65 font-light leading-relaxed mb-6">
+                            Oslava nového roku v naprostém soukromí s partou až 20 lidí a neomezenou vířivkou.
+                        </p>
+                    </div>
+                    <a href="#rezervace" data-from="2026-12-26" data-to="2027-01-02" data-package="Silvestrovský týden (7 nocí)" class="pricing-inquiry-btn block text-center border border-slateDark text-slateDark hover:bg-slateDark hover:text-sandstone text-[11px] uppercase tracking-[0.18em] py-3 transition-colors">
+                        Poptat Silvestr
+                    </a>
+                </div>
+            </div>
+
+            <!-- Ceník pronájmu: sloučené informace o platbách, poplatcích, službách v ceně a podmínkách rezervace -->
+            <div class="border border-hairline bg-white">
+                <div class="px-8 sm:px-10 pt-8 sm:pt-10 pb-6 border-b border-hairline">
+                    <span class="text-[11px] uppercase tracking-[0.22em] text-oak block mb-2">Platby, poplatky &amp; podmínky</span>
+                    <h3 class="font-serif text-3xl sm:text-4xl text-slateDark font-normal">Ceník pronájmu</h3>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 divide-y lg:divide-y-0 lg:divide-x divide-hairline">
+                    <!-- Skupina 1 – Cena a platby -->
+                    <div class="p-8 sm:p-10">
+                        <h4 class="text-xs uppercase tracking-[0.2em] text-oak font-semibold mb-4">Cena a platby</h4>
+                        <ul class="space-y-2.5 text-sm text-slateDark/80 font-light leading-relaxed">
+                            <li class="flex items-start gap-2.5">
+                                <span class="text-oak mt-0.5">•</span>
+                                <span><strong class="font-medium text-slateDark">50% záloha</strong> při rezervaci převodem na bankovní účet</span>
+                            </li>
+                            <li class="flex items-start gap-2.5">
+                                <span class="text-oak mt-0.5">•</span>
+                                <span>Doplatek <strong class="font-medium text-slateDark">3 týdny</strong> před pobytem</span>
+                            </li>
+                            <li class="flex items-start gap-2.5">
+                                <span class="text-oak mt-0.5">•</span>
+                                <span>Na místě: vratná kauce <strong class="font-medium text-slateDark">5 000 Kč</strong> na škody na zařízení</span>
+                            </li>
+                            <li class="flex items-start gap-2.5">
+                                <span class="text-oak mt-0.5">•</span>
+                                <span>Na místě: rekreační poplatek hrazený obci</span>
+                            </li>
+                            <li class="flex items-start gap-2.5">
+                                <span class="text-oak mt-0.5">•</span>
+                                <span>Na místě: elektřina dle skutečné spotřeby</span>
+                            </li>
+                            <li class="flex items-start gap-2.5">
+                                <span class="text-oak mt-0.5">•</span>
+                                <span>Na místě: vytápění v topné sezoně – dřevěné pelety <strong class="font-medium text-slateDark">350 Kč/den</strong></span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Skupina 2 – Co je zahrnuto v ceně -->
+                    <div class="p-8 sm:p-10">
+                        <h4 class="text-xs uppercase tracking-[0.2em] text-moss font-semibold mb-4">✓ Vždy v ceně pobytu</h4>
+                        <ul class="space-y-2.5 text-sm text-slateDark/80 font-light leading-relaxed">
+                            <li class="flex items-start gap-2.5">
+                                <span class="text-moss mt-0.5">•</span>
+                                <span>Pronájem celého objektu (5 ložnic, 3 koupelny, herna)</span>
+                            </li>
+                            <li class="flex items-start gap-2.5">
+                                <span class="text-moss mt-0.5">•</span>
+                                <span>Neomezený vstup do privátní sauny a vířivky 24/7</span>
+                            </li>
+                            <li class="flex items-start gap-2.5">
+                                <span class="text-moss mt-0.5">•</span>
+                                <span>Ložní prádlo a osušky do wellness</span>
+                            </li>
+                            <li class="flex items-start gap-2.5">
+                                <span class="text-moss mt-0.5">•</span>
+                                <span>Dřevo do krbu a vysokorychlostní Wi-Fi</span>
+                            </li>
+                            <li class="flex items-start gap-2.5">
+                                <span class="text-moss mt-0.5">•</span>
+                                <span>Parkování pro 5 osobních vozů přímo u chaty</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Skupina 3 – Podmínky rezervace (minimální délka pobytu) -->
+                    <div class="p-8 sm:p-10">
+                        <h4 class="text-xs uppercase tracking-[0.2em] text-moss font-semibold mb-4">Podmínky rezervace</h4>
+                        <ul class="space-y-2.5 text-sm text-slateDark/80 font-light leading-relaxed">
+                            <li class="flex items-start gap-2.5">
+                                <span class="text-moss mt-0.5">•</span>
+                                <span>Leden – začátek jarních prázdnin, konec jarních prázdnin – konec června a konec letních prázdnin – Vánoce: <strong class="font-medium text-slateDark">min. 3 noci</strong></span>
+                            </li>
+                            <li class="flex items-start gap-2.5">
+                                <span class="text-moss mt-0.5">•</span>
+                                <span>Jarní a letní prázdniny: <strong class="font-medium text-slateDark">7 nocí</strong> (od soboty do soboty)</span>
+                            </li>
+                            <li class="flex items-start gap-2.5">
+                                <span class="text-moss mt-0.5">•</span>
+                                <span>Vánoce: <strong class="font-medium text-slateDark">min. 4 noci</strong></span>
+                            </li>
+                            <li class="flex items-start gap-2.5">
+                                <span class="text-moss mt-0.5">•</span>
+                                <span>Silvestr: <strong class="font-medium text-slateDark">min. 7 nocí</strong></span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 6. RECENZE HOSTŮ (VELKÝ EDITORIÁLNÍ CITÁT + PŘEPÍNÁNÍ) -->
+    <section id="recenze" class="py-24 lg:py-32 border-b border-hairline bg-sandstoneAlt/50">
+        <div class="max-w-[1440px] mx-auto px-6 lg:px-12">
+            
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+                <!-- Levý blok: Souhrnný odznak -->
+                <div class="lg:col-span-4 border border-hairline bg-white p-8 sm:p-10">
+                    <span class="text-[10px] uppercase tracking-[0.22em] text-oak block mb-3">Reference</span>
+                    <div class="font-serif text-5xl sm:text-6xl text-slateDark mb-2">4,9 / 5 <span class="text-oak text-3xl">★</span></div>
+                    <p class="text-xs uppercase tracking-[0.16em] text-slateDark font-medium mb-4">
+                        Ověřené hodnocení hostů na e-chalupy.cz
+                    </p>
+                    <p class="text-sm text-slateDark/70 font-light leading-relaxed mb-8">
+                        Vrací se k nám především skupiny spřátelených rodin, které oceňují čistotu, privátní wellness domek a klidnou polohu v Ostružné.
+                    </p>
+                    <div class="flex gap-3">
+                        <button type="button" id="rev-prev" class="w-11 h-11 border border-slateDark flex items-center justify-center hover:bg-slateDark hover:text-sandstone transition-colors" aria-label="Předchozí recenze">&larr;</button>
+                        <button type="button" id="rev-next" class="w-11 h-11 border border-slateDark flex items-center justify-center hover:bg-slateDark hover:text-sandstone transition-colors" aria-label="Další recenze">&rarr;</button>
+                    </div>
+                </div>
+
+                <!-- Pravý blok: Hlavní přepínatelný citát + přehled autorů -->
+                <div class="lg:col-span-8 lg:pl-8 flex flex-col justify-between">
+                    <div class="min-h-[220px] flex flex-col justify-center">
+                        <span class="font-serif text-6xl text-oak/40 leading-none mb-2">“</span>
+                        <blockquote id="rev-quote" class="font-serif italic text-2xl sm:text-4xl text-slateDark leading-snug mb-8">
+                            Krásně vybavená chata, naprosté soukromí a wellness domek, ze kterého děti ani dospělí nechtěli vylézt. Skvělá domluva s majitelem.
+                        </blockquote>
+                        <div class="flex items-center gap-4">
+                            <span class="w-10 h-[1px] bg-oak"></span>
+                            <span id="rev-author" class="text-xs uppercase tracking-[0.2em] font-medium text-slateDark">Jana Holečková, Brno</span>
+                        </div>
+                    </div>
+
+                    <!-- Přepínací lišta autorů -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 border-t border-hairline mt-12 pt-6 gap-4" id="rev-selectors">
+                        <button type="button" data-rev="0" class="rev-sel text-left py-2 border-t-2 border-oak">
+                            <span class="block text-xs uppercase tracking-[0.16em] font-medium text-slateDark">Jana Holečková</span>
+                            <span class="text-xs text-slateDark/55">Brno • Rodinný pobyt</span>
+                        </button>
+                        <button type="button" data-rev="1" class="rev-sel text-left py-2 border-t-2 border-transparent opacity-60 hover:opacity-100 transition-opacity">
+                            <span class="block text-xs uppercase tracking-[0.16em] font-medium text-slateDark">Rodina Kolečkova</span>
+                            <span class="text-xs text-slateDark/55">Ostrava • 4 rodiny s dětmi</span>
+                        </button>
+                        <button type="button" data-rev="2" class="rev-sel text-left py-2 border-t-2 border-transparent opacity-60 hover:opacity-100 transition-opacity">
+                            <span class="block text-xs uppercase tracking-[0.16em] font-medium text-slateDark">Marcela Bartošová</span>
+                            <span class="text-xs text-slateDark/55">Olomouc • Zimní dovolená</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 7. REZERVACE & EXTERNÍ KALENDÁŘ Z E-CHALUPY.CZ -->
+    <section id="rezervace" class="py-24 lg:py-32 border-b border-hairline bg-sandstone">
+        <div class="max-w-[1440px] mx-auto px-6 lg:px-12">
+            
+            <div class="max-w-2xl mb-14">
+                <span class="text-[11px] uppercase tracking-[0.22em] text-oak block mb-3">Obsazenost &amp; Poptávka</span>
+                <h2 class="font-serif text-4xl sm:text-5xl text-slateDark font-normal mb-4">
+                    Vyberte si volný termín
+                </h2>
+                <p class="text-sm sm:text-base text-slateDark/75 font-light">
+                    Kalendář obsazenosti vlevo je synchronizován s naším profilem na <strong class="font-medium text-slateDark">e-chalupy.cz</strong>. Kliknutím na volný den předvyplníte datum příjezdu a odešlete nezávaznou poptávku přímo majiteli.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 border border-slateDark bg-white">
+                
+                <!-- LEVÝ BLOK: Externí kalendář obsazenosti (e-chalupy.cz) -->
+                <div class="lg:col-span-6 p-6 sm:p-10 lg:p-12 lg:border-r border-slateDark bg-sandstone/40 flex flex-col justify-between">
+                    <div>
+                        <div class="flex flex-wrap items-center justify-between gap-4 pb-6 mb-6 border-b border-hairline">
+                            <div>
+                                <span class="text-[10px] uppercase tracking-[0.2em] text-moss font-semibold block mb-1">
+                                    ● Živá synchronizace s e-chalupy.cz
+                                </span>
+                                <h3 class="font-serif text-2xl text-slateDark">Kalendář obsazenosti</h3>
+                            </div>
+
+                            <div class="flex items-center border border-slateDark bg-white">
+                                <button type="button" id="cal-prev" class="px-3.5 py-2 text-xs hover:bg-slateDark hover:text-sandstone transition-colors" aria-label="Předchozí měsíc">&larr;</button>
+                                <span id="cal-title" class="px-4 py-2 text-xs uppercase tracking-[0.15em] font-medium min-w-[145px] text-center">Prosinec 2026</span>
+                                <button type="button" id="cal-next" class="px-3.5 py-2 text-xs hover:bg-slateDark hover:text-sandstone transition-colors" aria-label="Další měsíc">&rarr;</button>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-7 gap-1 text-center text-[10px] uppercase tracking-[0.2em] text-slateDark/50 pb-3">
+                            <div>Po</div><div>Út</div><div>St</div><div>Čt</div><div>Pá</div><div class="text-oak">So</div><div class="text-oak">Ne</div>
+                        </div>
+
+                        <div id="cal-grid" class="grid grid-cols-7 gap-1 text-center text-xs">
+                            <!-- Generuje JS -->
+                        </div>
+                    </div>
+
+                    <div class="mt-8 pt-5 border-t border-hairline flex flex-wrap items-center justify-between gap-4 text-[11px] uppercase tracking-[0.14em] text-slateDark/70">
+                        <div class="flex items-center gap-5">
+                            <span class="inline-flex items-center gap-2">
+                                <span class="w-3 h-3 bg-white border border-slateDark"></span> Volno
+                            </span>
+                            <span class="inline-flex items-center gap-2">
+                                <span class="w-3 h-3 bg-slateDark/15 border border-slateDark/20"></span> Obsazeno
+                            </span>
+                            <span class="inline-flex items-center gap-2">
+                                <span class="w-3 h-3 bg-oak/25 border border-oak"></span> Rezervace v jednání
+                            </span>
+                        </div>
+                        <span class="text-[10px] text-slateDark/50">WordPress embed e-chalupy.cz</span>
+                    </div>
+                </div>
+
+                <!-- PRAVÝ BLOK: Poptávkový formulář -->
+                <div class="lg:col-span-6 p-6 sm:p-10 lg:p-12">
+                    <h3 class="font-serif text-2xl text-slateDark mb-2">Nezávazná poptávka pobytu</h3>
+                    <p class="text-xs text-slateDark/60 mb-8">Odpovídáme obratem s přesnou kalkulací bez zprostředkovatelských provizí.</p>
+
+                    <form id="inquiry-form" class="space-y-6">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div>
+                                <label for="in-from" class="block text-[10px] uppercase tracking-[0.2em] text-slateDark/70 mb-2">Termín od *</label>
+                                <input type="date" id="in-from" required class="w-full bg-transparent border-b border-slateDark py-2.5 text-sm text-slateDark focus:outline-none focus:border-oak">
+                            </div>
+                            <div>
+                                <label for="in-to" class="block text-[10px] uppercase tracking-[0.2em] text-slateDark/70 mb-2">Termín do *</label>
+                                <input type="date" id="in-to" required class="w-full bg-transparent border-b border-slateDark py-2.5 text-sm text-slateDark focus:outline-none focus:border-oak">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div>
+                                <label for="in-guests" class="block text-[10px] uppercase tracking-[0.2em] text-slateDark/70 mb-2">Počet osob (max. 20) *</label>
+                                <input type="number" id="in-guests" min="1" max="20" placeholder="např. 14 osob" required class="w-full bg-transparent border-b border-slateDark py-2.5 text-sm text-slateDark placeholder:text-slateDark/35 focus:outline-none focus:border-oak">
+                            </div>
+                            <div>
+                                <label for="in-name" class="block text-[10px] uppercase tracking-[0.2em] text-slateDark/70 mb-2">Jméno a příjmení *</label>
+                                <input type="text" id="in-name" placeholder="Jan Novák" required class="w-full bg-transparent border-b border-slateDark py-2.5 text-sm text-slateDark placeholder:text-slateDark/35 focus:outline-none focus:border-oak">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div>
+                                <label for="in-email" class="block text-[10px] uppercase tracking-[0.2em] text-slateDark/70 mb-2">E-mail *</label>
+                                <input type="email" id="in-email" placeholder="jan@novak.cz" required class="w-full bg-transparent border-b border-slateDark py-2.5 text-sm text-slateDark placeholder:text-slateDark/35 focus:outline-none focus:border-oak">
+                            </div>
+                            <div>
+                                <label for="in-phone" class="block text-[10px] uppercase tracking-[0.2em] text-slateDark/70 mb-2">Telefon *</label>
+                                <input type="tel" id="in-phone" placeholder="+420 777 000 000" required class="w-full bg-transparent border-b border-slateDark py-2.5 text-sm text-slateDark placeholder:text-slateDark/35 focus:outline-none focus:border-oak">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="in-note" class="block text-[10px] uppercase tracking-[0.2em] text-slateDark/70 mb-2">Poznámka</label>
+                            <textarea id="in-note" rows="2" placeholder="Počet dětí, zájem o dětskou postýlku nebo speciální přání..." class="w-full bg-transparent border-b border-slateDark py-2.5 text-sm text-slateDark placeholder:text-slateDark/35 focus:outline-none focus:border-oak"></textarea>
+                        </div>
+
+                        <button type="submit" class="w-full bg-slateDark hover:bg-moss text-sandstone text-xs uppercase tracking-[0.22em] font-medium py-4 transition-colors">
+                            Odeslat nezávaznou poptávku
+                        </button>
+                    </form>
+
+                    <div id="inquiry-feedback" class="hidden mt-6 p-4 border border-moss bg-moss/10 text-slateDark text-xs leading-relaxed">
+                        <strong class="uppercase tracking-[0.15em] block mb-1 text-moss">Poptávka byla úspěšně odeslána</strong>
+                        Děkujeme za váš zájem o Wellness chatu Relax. Potvrzení termínu vám zašleme co nejdříve na uvedený e-mail.
+                    </div>
+
+                    <div id="inquiry-error" role="alert" class="hidden mt-6 p-4 border border-oak bg-oak/10 text-slateDark text-xs leading-relaxed"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 8. INTERAKTIVNÍ MAPA LEAFLET.JS (BEZ API KLÍČE, GPS PIN UKOTVENÝ K SOUŘADNICÍM OSTRUŽNÁ 82) -->
+    <section id="lokalita" class="py-24 lg:py-32 bg-white">
+        <div class="max-w-[1440px] mx-auto px-6 lg:px-12">
+            
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                
+                <!-- Levý textový sloupec -->
+                <div class="lg:col-span-4">
+                    <span class="text-[11px] uppercase tracking-[0.22em] text-oak block mb-3">Lokalita &amp; Dostupnost</span>
+                    <h2 class="font-serif text-4xl sm:text-5xl text-slateDark font-normal mb-6">
+                        Ostružná v srdci <span class="italic">Hrubého Jeseníku</span>
+                    </h2>
+                    <p class="text-sm text-slateDark/75 font-light leading-relaxed mb-8">
+                        Chata leží v klidné části horské obce Ostružná (720 m n. m.), jen pár minut od sjezdovek, běžkařských tras i lanovky na Šerák. Pohodlný celoroční příjezd až k objektu.
+                    </p>
+
+                    <dl class="border-t border-hairline text-xs divide-y divide-hairline mb-8">
+                        <div class="py-3 flex justify-between">
+                            <dt class="uppercase tracking-[0.15em] text-slateDark/55">Skiareál Ostružná</dt>
+                            <dd class="font-medium text-slateDark">600 m (2 min autem)</dd>
+                        </div>
+                        <div class="py-3 flex justify-between">
+                            <dt class="uppercase tracking-[0.15em] text-slateDark/55">Skiareál Ramzová &amp; lanovka</dt>
+                            <dd class="font-medium text-slateDark">2,0 km (4 min autem)</dd>
+                        </div>
+                        <div class="py-3 flex justify-between">
+                            <dt class="uppercase tracking-[0.15em] text-slateDark/55">Skiareál Petříkov</dt>
+                            <dd class="font-medium text-slateDark">3,0 km (5 min autem)</dd>
+                        </div>
+                        <div class="py-3 flex justify-between">
+                            <dt class="uppercase tracking-[0.15em] text-slateDark/55">Hřebenovka na Šerák (1 351 m)</dt>
+                            <dd class="font-medium text-slateDark">Nástup přímo z obce</dd>
+                        </div>
+                    </dl>
+
+                    <a href="https://www.google.com/maps/search/?api=1&query=Wellness+chata+Relax+Ostruzna+82" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-slateDark border-b border-slateDark pb-1.5 hover:text-oak hover:border-oak transition-colors">
+                        Naplánovat trasu v Google Mapách <span>&nearr;</span>
+                    </a>
+                </div>
+
+                <!-- Pravý sloupec: Interaktivní mapa Leaflet.js se skutečným GPS markerem na Ostružná 82 -->
+                <div class="lg:col-span-8">
+                    <div class="relative border border-slateDark/30 bg-[#EFEBE2] overflow-hidden h-[460px] sm:h-[520px] nordic-leaflet-map">
+                        <!-- Kontejner pro Leaflet mapu -->
+                        <div id="ostruzna-nordic-map" class="w-full h-full z-10"></div>
+
+                        <!-- Plovoucí tlačítko do Google Map vpravo dole -->
+                        <a href="https://www.google.com/maps/search/?api=1&query=Wellness+chata+Relax+Ostruzna+82" target="_blank" rel="noopener noreferrer" class="absolute bottom-4 right-4 z-20 bg-[#2D4234] hover:bg-[#3E5641] text-sandstone text-[11px] uppercase tracking-[0.18em] font-medium px-5 py-3 border border-white/15 transition-colors shadow-md">
+                            Otevřít v Google Mapách &nearr;
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 9. ARCHITEKTONICKÝ TMAVÝ FOOTER -->
+    <footer class="bg-slateDark text-sandstone/80 pt-20 pb-12">
+        <div class="max-w-[1440px] mx-auto px-6 lg:px-12">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-12 pb-16 border-b border-white/15">
+                
+                <div class="md:col-span-5">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="font-serif text-3xl text-sandstone">
+                            Wellness chata <span class="italic text-oak">Relax</span>
+                        </span>
+                    </div>
+                    <p class="text-sm text-sandstone/65 font-light leading-relaxed max-w-sm mb-6">
+                        Soukromý horský objekt v Ostružné v Jeseníkách. Pronájem celé chaty s privátním wellness domkem pro rodiny a uzavřené společnosti až do 20 osob.
+                    </p>
+                    <p class="text-xs uppercase tracking-[0.18em] text-sandstone/50">
+                        Ostružná 82 • 788 25 Ostružná
+                    </p>
+                </div>
+
+                <div class="md:col-span-3">
+                    <h4 class="text-[10px] uppercase tracking-[0.22em] text-oak mb-5">Navigace</h4>
+                    <ul class="space-y-3 text-xs uppercase tracking-[0.16em]">
+                        <li><a href="#chata-zazemi" class="hover:text-sandstone transition-colors">Chata &amp; Zázemí</a></li>
+                        <li><a href="#galerie" class="hover:text-sandstone transition-colors">Fotogalerie</a></li>
+                        <li><a href="#cenik" class="hover:text-sandstone transition-colors">Ceník pronájmu</a></li>
+                        <li><a href="#recenze" class="hover:text-sandstone transition-colors">Recenze hostů</a></li>
+                        <li><a href="#rezervace" class="hover:text-sandstone transition-colors">Obsazenost &amp; Poptávka</a></li>
+                    </ul>
+                </div>
+
+                <div class="md:col-span-4">
+                    <h4 class="text-[10px] uppercase tracking-[0.22em] text-oak mb-5">Přímý kontakt &amp; Provozovatel</h4>
+                    <ul class="space-y-3 text-sm font-light">
+                        <li>Tel.: <a href="tel:+420775753033" class="text-sandstone hover:text-oak transition-colors">+420 775 753 033</a></li>
+                        <li>E-mail: <a href="mailto:info@relaxostruzna.cz" class="text-sandstone hover:text-oak transition-colors">info@relaxostruzna.cz</a></li>
+                        <li class="pt-3 text-xs text-sandstone/50 leading-relaxed">
+                            CALLA Prime s.r.o. • IČO: 22436049<br>
+                            Zapsáno v obchodním rejstříku
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-[11px] uppercase tracking-[0.16em] text-sandstone/45">
+                <span>&copy; 2026 Wellness chata Relax — Ostružná</span>
+                <span>Připraveno pro WordPress • Napojení na e-chalupy.cz</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- MODÁLNÍ LIGHTBOX PRO GALERII -->
+    <div id="lightbox" class="fixed inset-0 z-50 hidden bg-slateDark/95 backdrop-blur-md flex flex-col items-center justify-center p-4 sm:p-10">
+        <button type="button" id="lb-close" class="absolute top-6 right-6 text-sandstone hover:text-oak text-xs uppercase tracking-[0.2em] border border-sandstone/30 px-4 py-2 transition-colors">
+            Zavřít &times;
+        </button>
+        <div class="max-w-5xl w-full">
+            <img id="lb-img" src="" alt="Zvětšený náhled" class="w-full max-h-[78vh] object-contain border border-white/15 bg-black">
+            <p id="lb-caption" class="mt-4 text-center font-serif italic text-xl text-sandstone"></p>
+        </div>
+    </div>
+
+    <!-- Leaflet.js Skript (Bez potřeby API klíče) -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+
+    <!-- INTERAKTIVNÍ SKRIPTY -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. Mobilní menu
+            const mobileBtn = document.getElementById('mobile-menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+            mobileMenu.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', () => mobileMenu.classList.add('hidden'));
+            });
+
+            // 2. Kategorie galerie (6 lokálních fotek .webp v každé kategorii, fixní Bento mřížka bez bílých mezer)
+            const galleryData = {
+                exterier: [
+                    {
+                        src: 'img/exterier-1.webp',
+                        caption: 'Celkový pohled na chatu se zahradou, krytou terasou a parkováním',
+                        gridClass: 'md:col-span-8 md:col-start-1 md:row-start-1 md:row-span-2 aspect-[16/11] md:aspect-auto md:h-full'
+                    },
+                    {
+                        src: 'img/exterier-2.webp',
+                        caption: 'Slunná zahrada a zastřešená terasa s venkovním krbem',
+                        gridClass: 'md:col-span-4 md:col-start-9 md:row-start-1 aspect-[4/3] md:aspect-auto md:h-full'
+                    },
+                    {
+                        src: 'img/exterier-3.webp',
+                        caption: 'Zimní atmosféra – chata obklopená sněhem v Ostružné',
+                        gridClass: 'md:col-span-4 md:col-start-9 md:row-start-2 aspect-[4/3] md:aspect-auto md:h-full'
+                    },
+                    {
+                        src: 'img/exterier-4.webp',
+                        caption: 'Dětské hřiště se skluzavkou a houpačkami na zahradě',
+                        gridClass: 'md:col-span-4 md:col-start-1 md:row-start-3 aspect-[4/3] md:aspect-auto md:h-full'
+                    },
+                    {
+                        src: 'img/exterier-5.webp',
+                        caption: 'Zastřešené venkovní posezení s krbem a grilem',
+                        gridClass: 'md:col-span-4 md:col-start-5 md:row-start-3 aspect-[4/3] md:aspect-auto md:h-full'
+                    },
+                    {
+                        src: 'img/exterier-6.webp',
+                        caption: 'Venkovní ohniště s dřevěným posezením a výhledem do přírody',
+                        gridClass: 'md:col-span-4 md:col-start-9 md:row-start-3 aspect-[4/3] md:aspect-auto md:h-full'
+                    }
+                ],
+                interier: [
+                    {
+                        src: 'img/interier-1.webp',
+                        caption: 'Prostorná společenská místnost s jídelními stoly a TV',
+                        gridClass: 'md:col-span-4 md:col-start-1 md:row-start-1 aspect-[4/3]'
+                    },
+                    {
+                        src: 'img/interier-2.webp',
+                        caption: 'Útulná podkrovní ložnice s dřevěným obložením',
+                        gridClass: 'md:col-span-4 md:col-start-1 md:row-start-2 aspect-[4/3]'
+                    },
+                    {
+                        src: 'img/interier-3.webp',
+                        caption: 'Světlá ložnice z masivního dřeva s manželskou postelí a výhledem',
+                        gridClass: 'md:col-span-8 md:col-start-5 md:row-start-1 md:row-span-2 aspect-[16/11] md:aspect-auto md:min-h-[540px]'
+                    },
+                    {
+                        src: 'img/interier-4.webp',
+                        caption: 'Ložnice z masivního dřeva s výhledem do přírody',
+                        gridClass: 'md:col-span-4 aspect-[4/3]'
+                    },
+                    {
+                        src: 'img/interier-5.webp',
+                        caption: 'Plně vybavená prostorná kuchyně pro velké skupiny',
+                        gridClass: 'md:col-span-4 aspect-[4/3]'
+                    },
+                    {
+                        src: 'img/interier-6.webp',
+                        caption: 'Moderní koupelna se sprchovým koutem a úložným prostorem',
+                        gridClass: 'md:col-span-4 aspect-[4/3]'
+                    }
+                ],
+                wellness: [
+                    {
+                        src: 'img/wellness-1.webp',
+                        caption: 'Privátní finská sauna z masivního dřeva',
+                        gridClass: 'md:col-span-4 aspect-[4/3]'
+                    },
+                    {
+                        src: 'img/wellness-2.webp',
+                        caption: 'Odpočinková zóna s lehátky u sauny',
+                        gridClass: 'md:col-span-4 aspect-[4/3]'
+                    },
+                    {
+                        src: 'img/wellness-3.webp',
+                        caption: 'Prosklená relaxační zóna s vířivkou, posezením a výhledem do zahrady',
+                        gridClass: 'md:col-span-4 aspect-[4/3]'
+                    },
+                    {
+                        src: 'img/wellness-4.webp',
+                        caption: 'Ochlazovací bazének a sprcha v mozaikovém obkladu',
+                        gridClass: 'md:col-span-8 md:row-span-2 aspect-[16/11] md:aspect-auto md:min-h-[540px]'
+                    },
+                    {
+                        src: 'img/wellness-5.webp',
+                        caption: 'Prosklený wellness pavilon v zimní krajině',
+                        gridClass: 'md:col-span-4 aspect-[4/3]'
+                    },
+                    {
+                        src: 'img/wellness-6.webp',
+                        caption: 'Kompletní privátní wellness – vířivka, lehátka a finská sauna',
+                        gridClass: 'md:col-span-4 aspect-[4/3]'
+                    }
+                ]
+            };
+
+            const galleryGrid = document.getElementById('gallery-grid');
+            const filterBtns = document.querySelectorAll('.gal-filter');
+            const lightbox = document.getElementById('lightbox');
+            const lbImg = document.getElementById('lb-img');
+            const lbCaption = document.getElementById('lb-caption');
+            const lbClose = document.getElementById('lb-close');
+
+            function renderGallery(category) {
+                const items = galleryData[category] || galleryData.exterier;
+                galleryGrid.innerHTML = '';
+
+                if (category === 'exterier') {
+                    galleryGrid.classList.add('md:grid-rows-[repeat(3,235px)]');
+                } else {
+                    galleryGrid.classList.remove('md:grid-rows-[repeat(3,235px)]');
+                }
+
+                items.forEach((item) => {
+                    const card = document.createElement('div');
+                    card.className = `gal-item ${item.gridClass} group relative overflow-hidden border border-hairline bg-slateDark cursor-pointer`;
+                    card.innerHTML = `
+                        <img src="${item.src}" alt="${item.caption}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                        <div class="absolute inset-0 bg-slateDark/0 group-hover:bg-slateDark/30 transition-colors flex items-end p-5">
+                            <span class="bg-sandstone/95 px-3.5 py-1.5 text-[10px] uppercase tracking-[0.16em] text-slateDark opacity-0 group-hover:opacity-100 transition-opacity">
+                                ${item.caption}
+                            </span>
+                        </div>
+                    `;
+
+                    card.addEventListener('click', () => {
+                        const imgEl = card.querySelector('img');
+                        lbImg.src = imgEl.src;
+                        lbCaption.textContent = item.caption;
+                        lightbox.classList.remove('hidden');
+                    });
+
+                    galleryGrid.appendChild(card);
+                });
+            }
+
+            // Výchozí zobrazení: Exteriér / Venek
+            renderGallery('exterier');
+
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const category = btn.getAttribute('data-category');
+
+                    filterBtns.forEach(b => {
+                        b.classList.remove('bg-slateDark', 'text-sandstone', 'active');
+                        b.classList.add('text-slateDark');
+                    });
+                    btn.classList.add('bg-slateDark', 'text-sandstone', 'active');
+                    btn.classList.remove('text-slateDark');
+
+                    renderGallery(category);
+                });
+            });
+
+            // 3. Ovládání Lightboxu
+            lbClose.addEventListener('click', () => lightbox.classList.add('hidden'));
+            lightbox.addEventListener('click', (e) => {
+                if (e.target === lightbox) lightbox.classList.add('hidden');
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') lightbox.classList.add('hidden');
+            });
+
+            // 4. Přepínání recenzí
+            const reviews = [
+                {
+                    quote: 'Krásně vybavená chata, naprosté soukromí a wellness domek, ze kterého děti ani dospělí nechtěli vylézt. Skvělá domluva s majitelem.',
+                    author: 'Jana Holečková, Brno'
+                },
+                {
+                    quote: 'Jezdíme parta čtyř rodin s dětmi a prostor je ideální – nikdo se netlačí, herna pro děti zachránila večery a po lyžování v Ramzové byla sauna dokonalá.',
+                    author: 'Rodina Kolečkova, Ostrava'
+                },
+                {
+                    quote: 'Čistota na jedničku, venkovní pergola s letní kuchyní nemá chybu a lokalita v Ostružné je výborný výchozí bod na Šerák i sjezdovky.',
+                    author: 'Marcela Bartošová, Olomouc'
+                }
+            ];
+
+            let currentRev = 0;
+            const revQuote = document.getElementById('rev-quote');
+            const revAuthor = document.getElementById('rev-author');
+            const revSelectors = document.querySelectorAll('.rev-sel');
+
+            function updateReview(idx) {
+                currentRev = idx;
+                revQuote.textContent = reviews[idx].quote;
+                revAuthor.textContent = reviews[idx].author;
+
+                revSelectors.forEach((sel, i) => {
+                    if (i === idx) {
+                        sel.classList.add('border-oak');
+                        sel.classList.remove('border-transparent', 'opacity-60');
+                    } else {
+                        sel.classList.remove('border-oak');
+                        sel.classList.add('border-transparent', 'opacity-60');
+                    }
+                });
+            }
+
+            revSelectors.forEach(sel => {
+                sel.addEventListener('click', () => {
+                    updateReview(Number(sel.getAttribute('data-rev')));
+                });
+            });
+            document.getElementById('rev-prev').addEventListener('click', () => {
+                updateReview((currentRev - 1 + reviews.length) % reviews.length);
+            });
+            document.getElementById('rev-next').addEventListener('click', () => {
+                updateReview((currentRev + 1) % reviews.length);
+            });
+
+            // 5. Kalendář obsazenosti (ukázková data pro návrh)
+            const MAX_MONTHS_AHEAD = 24;
+            const monthNames = ['Leden', 'Únor', 'Březen', 'Duben', 'Květen', 'Červen', 'Červenec', 'Srpen', 'Září', 'Říjen', 'Listopad', 'Prosinec'];
+
+            const calTitle = document.getElementById('cal-title');
+            const calGrid = document.getElementById('cal-grid');
+            const calPrev = document.getElementById('cal-prev');
+            const calNext = document.getElementById('cal-next');
+
+            const inquiryForm = document.getElementById('inquiry-form');
+            const inquiryFeedback = document.getElementById('inquiry-feedback');
+            const inquiryError = document.getElementById('inquiry-error');
+            const inputFrom = document.getElementById('in-from');
+            const inputTo = document.getElementById('in-to');
+            const inputNote = document.getElementById('in-note');
+            const inputGuests = document.getElementById('in-guests');
+            const inputName = document.getElementById('in-name');
+            const inputEmail = document.getElementById('in-email');
+            const inputPhone = document.getElementById('in-phone');
+            const reservationSection = document.getElementById('rezervace');
+
+            const ISO_RE = /^\d{4}-\d{2}-\d{2}$/;
+            const pad = (n) => String(n).padStart(2, '0');
+            const toIso = (y, m, d) => `${y}-${pad(m + 1)}-${pad(d)}`;
+
+            const now = new Date();
+            const todayIso = toIso(now.getFullYear(), now.getMonth(), now.getDate());
+            const firstViewMonth = now.getFullYear() * 12 + now.getMonth();
+            let viewIndex = Math.max(firstViewMonth, 2026 * 12 + 11); // rok * 12 + měsíc (0–11); ukázka se otevře na prosinci 2026
+
+            // Rezervace ze serveru: [{ from: 'RRRR-MM-DD', to: 'RRRR-MM-DD', status: 'confirmed' | 'pending' }]
+            // "from" = den příjezdu, "to" = den odjezdu (v den odjezdu může jiný host přijet).
+            let bookings = [];
+            let availabilityState = 'loading'; // loading | ready | error
+
+            inputFrom.min = todayIso;
+            inputTo.min = todayIso;
+
+            // Překryv s POTVRZENOU rezervací (odjezd ve stejný den jako příjezd jiného hosta překryv není)
+            function hasConflict(fromIso, toIso) {
+                return bookings.some((b) => b.status === 'confirmed' && b.from < toIso && b.to > fromIso);
+            }
+
+            // Stav noci začínající daným dnem
+            function nightStatus(iso) {
+                let pending = false;
+                for (const b of bookings) {
+                    if (b.from <= iso && iso < b.to) {
+                        if (b.status === 'confirmed') return 'busy';
+                        pending = true;
+                    }
+                }
+                return pending ? 'pending' : 'free';
+            }
+
+            function validateRange(fromIso, toIso) {
+                if (!fromIso || !toIso) return '';
+                if (!ISO_RE.test(fromIso) || !ISO_RE.test(toIso)) return 'Zadejte platné datum.';
+                if (fromIso < todayIso) return 'Datum příjezdu nesmí být v minulosti.';
+                if (toIso <= fromIso) return 'Datum odjezdu musí být po datu příjezdu.';
+                if (availabilityState === 'ready' && hasConflict(fromIso, toIso)) {
+                    return 'Ve vybraném termínu je chata již obsazená. Zvolte prosím jiné datum.';
+                }
+                return '';
+            }
+
+            function applyRangeValidity() {
+                inputTo.setCustomValidity(validateRange(inputFrom.value, inputTo.value));
+            }
+
+            function hideMessages() {
+                inquiryFeedback.classList.add('hidden');
+                inquiryError.classList.add('hidden');
+                inquiryError.textContent = '';
+            }
+
+            function showError(message) {
+                inquiryFeedback.classList.add('hidden');
+                inquiryError.textContent = message;
+                inquiryError.classList.remove('hidden');
+            }
+
+            function showMonthOf(iso) {
+                if (!ISO_RE.test(iso)) return;
+                const idx = Number(iso.slice(0, 4)) * 12 + (Number(iso.slice(5, 7)) - 1);
+                if (idx >= firstViewMonth && idx <= firstViewMonth + MAX_MONTHS_AHEAD) viewIndex = idx;
+            }
+
+            function syncAfterDateChange() {
+                applyRangeValidity();
+                drawCalendar();
+            }
+
+            function handleDayClick(iso) {
+                const f = inputFrom.value;
+                const t = inputTo.value;
+                if (ISO_RE.test(f) && !t && iso > f && !hasConflict(f, iso)) {
+                    inputTo.value = iso;      // druhý klik = odjezd
+                } else {
+                    inputFrom.value = iso;    // první klik = příjezd (nebo nový výběr)
+                    inputTo.value = '';
+                }
+                hideMessages();
+                syncAfterDateChange();
+            }
+
+            function drawCalendar() {
+                const year = Math.floor(viewIndex / 12);
+                const month = viewIndex % 12;
+                calTitle.textContent = `${monthNames[month]} ${year}`;
+
+                const prevOff = viewIndex <= firstViewMonth;
+                const nextOff = viewIndex >= firstViewMonth + MAX_MONTHS_AHEAD;
+                calPrev.disabled = prevOff;
+                calNext.disabled = nextOff;
+                calPrev.classList.toggle('opacity-30', prevOff);
+                calPrev.classList.toggle('pointer-events-none', prevOff);
+                calNext.classList.toggle('opacity-30', nextOff);
+                calNext.classList.toggle('pointer-events-none', nextOff);
+
+                calGrid.innerHTML = '';
+
+                if (availabilityState !== 'ready') {
+                    const msg = document.createElement('div');
+                    msg.className = 'col-span-7 py-10 text-xs text-slateDark/60 leading-relaxed';
+                    if (availabilityState === 'loading') {
+                        msg.textContent = 'Načítám aktuální obsazenost…';
+                    } else {
+                        msg.appendChild(document.createTextNode('Obsazenost se nepodařilo načíst. Zkuste to prosím znovu, nebo nám zavolejte. '));
+                        const retry = document.createElement('button');
+                        retry.type = 'button';
+                        retry.className = 'underline hover:text-oak transition-colors';
+                        retry.textContent = 'Zkusit znovu';
+                        retry.addEventListener('click', loadAvailability);
+                        msg.appendChild(retry);
+                    }
+                    calGrid.appendChild(msg);
+                    return;
+                }
+
+                const offset = (new Date(year, month, 1).getDay() + 6) % 7; // pondělí = 0
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+                const f = ISO_RE.test(inputFrom.value) ? inputFrom.value : '';
+                const t = ISO_RE.test(inputTo.value) ? inputTo.value : '';
+                const departureMode = Boolean(f) && !t && f >= todayIso;
+
+                for (let i = 0; i < offset; i++) {
+                    const blank = document.createElement('div');
+                    blank.className = 'py-2.5';
+                    calGrid.appendChild(blank);
+                }
+
+                for (let d = 1; d <= daysInMonth; d++) {
+                    const iso = toIso(year, month, d);
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.textContent = d;
+
+                    const status = nightStatus(iso);
+                    const isValidDeparture = departureMode && iso > f && !hasConflict(f, iso);
+                    let clickable = true;
+
+                    if (iso < todayIso) {
+                        btn.className = 'py-2.5 text-slateDark/25 cursor-not-allowed border border-transparent';
+                        btn.title = 'Termín již uplynul';
+                        clickable = false;
+                    } else if (iso === f || iso === t) {
+                        btn.className = 'py-2.5 bg-slateDark text-sandstone font-medium border border-slateDark';
+                        btn.title = iso === f ? 'Příjezd' : 'Odjezd';
+                    } else if (f && t && iso > f && iso < t) {
+                        btn.className = 'py-2.5 bg-moss/15 text-slateDark border border-moss/30';
+                        btn.title = 'Vybraný pobyt';
+                    } else if (isValidDeparture) {
+                        btn.className = 'py-2.5 bg-white text-slateDark font-medium border border-hairline hover:border-slateDark hover:bg-slateDark hover:text-sandstone transition-colors';
+                        btn.title = 'Kliknutím vyberete odjezd';
+                    } else if (status === 'busy') {
+                        btn.className = 'py-2.5 bg-slateDark/15 text-slateDark/40 line-through cursor-not-allowed border border-transparent';
+                        btn.title = 'Obsazeno';
+                        clickable = false;
+                    } else if (status === 'pending') {
+                        btn.className = 'py-2.5 bg-oak/25 text-slateDark border border-oak hover:bg-oak hover:text-sandstone transition-colors';
+                        btn.title = 'Rezervace v jednání';
+                    } else {
+                        btn.className = 'py-2.5 bg-white text-slateDark font-medium border border-hairline hover:border-slateDark hover:bg-slateDark hover:text-sandstone transition-colors';
+                        btn.title = 'Volný termín – kliknutím vyberete příjezd';
+                    }
+
+                    if (clickable) {
+                        btn.addEventListener('click', () => handleDayClick(iso));
+                    } else {
+                        btn.disabled = true;
+                    }
+                    calGrid.appendChild(btn);
+                }
+            }
+
+            // UKÁZKOVÁ DATA pro návrh. Ve finální verzi je nahradí kalendář z e-chalupy.cz (embed),
+            // který majitel spravuje externě. "to" = den odjezdu.
+            const DEMO_BOOKINGS = [
+                { from: '2026-12-04', to: '2026-12-07', status: 'confirmed' },
+                { from: '2026-12-11', to: '2026-12-14', status: 'pending' },
+                { from: '2026-12-18', to: '2026-12-21', status: 'confirmed' },
+                { from: '2027-01-08', to: '2027-01-11', status: 'confirmed' },
+                { from: '2027-01-15', to: '2027-01-18', status: 'pending' },
+                { from: '2027-01-22', to: '2027-01-25', status: 'confirmed' },
+                { from: '2027-01-29', to: '2027-02-01', status: 'confirmed' },
+                { from: '2027-02-05', to: '2027-02-08', status: 'confirmed' },
+                { from: '2027-02-12', to: '2027-02-22', status: 'confirmed' },
+                { from: '2027-02-26', to: '2027-03-01', status: 'pending' }
+            ];
+
+            function loadAvailability() {
+                bookings = DEMO_BOOKINGS.slice();
+                availabilityState = 'ready';
+                applyRangeValidity();
+                drawCalendar();
+            }
+
+            calPrev.addEventListener('click', () => {
+                if (viewIndex > firstViewMonth) viewIndex--;
+                drawCalendar();
+            });
+            calNext.addEventListener('click', () => {
+                if (viewIndex < firstViewMonth + MAX_MONTHS_AHEAD) viewIndex++;
+                drawCalendar();
+            });
+
+            // Ruční zadání data do polí formuláře se propíše do kalendáře i do validace
+            inputFrom.addEventListener('change', () => {
+                showMonthOf(inputFrom.value);
+                syncAfterDateChange();
+            });
+            inputTo.addEventListener('change', syncAfterDateChange);
+
+            // 5b. Předvyplnění rezervačního formuláře z karet ceníku
+            const pricingButtons = document.querySelectorAll('.pricing-inquiry-btn');
+
+            pricingButtons.forEach((btn) => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+
+                    const dateFrom = btn.getAttribute('data-from') || '';
+                    const dateTo = btn.getAttribute('data-to') || '';
+                    const packageName = btn.getAttribute('data-package') || '';
+
+                    // Hodnoty se při každém kliknutí přepíšou podle aktuálně vybraného balíčku (uživatel je může dál upravit)
+                    inputFrom.value = dateFrom;
+                    inputTo.value = dateTo;
+                    if (packageName) {
+                        inputNote.value = packageName;
+                    }
+
+                    hideMessages();
+                    showMonthOf(dateFrom);
+                    syncAfterDateChange();
+
+                    if (dateFrom && dateTo && availabilityState === 'ready') {
+                        const err = validateRange(dateFrom, dateTo);
+                        if (err) showError(err);
+                    }
+
+                    reservationSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+                    setTimeout(() => {
+                        if (!dateFrom) {
+                            inputFrom.focus({ preventScroll: true });
+                        } else {
+                            inputGuests.focus({ preventScroll: true });
+                        }
+                    }, 450);
+                });
+            });
+
+            // 6. Odeslání formuláře (v návrhu pouze zobrazí potvrzení – nic se neodesílá)
+            inquiryForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                hideMessages();
+
+                const rangeError = validateRange(inputFrom.value, inputTo.value);
+                if (rangeError) {
+                    inputTo.setCustomValidity(rangeError);
+                    inputTo.reportValidity();
+                    return;
+                }
+
+                inquiryFeedback.classList.remove('hidden');
+                inquiryForm.reset();
+                applyRangeValidity();
+                drawCalendar();
+            });
+
+            loadAvailability();
+
+            // 7. Inicializace Leaflet.js mapy s reálným GPS markerem na Ostružná 82 [50.1783, 17.0481]
+            const mapEl = document.getElementById('ostruzna-nordic-map');
+            if (mapEl && typeof L !== 'undefined') {
+                const ostruznaCoords = [50.1783, 17.0481];
+                const map = L.map('ostruzna-nordic-map', {
+                    center: ostruznaCoords,
+                    zoom: 14,
+                    scrollWheelZoom: true,
+                    attributionControl: false
+                });
+
+                // Turistická (topografická) mapa bez API klíče: vrstevnice, lesy, cesty, kóty.
+                // Primárně Esri World Topo, záloha OpenTopoMap (přepne se při chybě sítě).
+                // Navrch značené turistické trasy (červená, modrá, zelená, žlutá) z Waymarked Trails.
+                // Pro ostrý provoz doporučeno použít službu s vlastním bezplatným klíčem (např. Mapy.cz nebo MapTiler Outdoor).
+                const esriTiles = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
+                    maxNativeZoom: 17,
+                    maxZoom: 18
+                });
+
+                const topoFallbackTiles = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+                    subdomains: 'abc',
+                    maxZoom: 17
+                });
+
+                const hikingTrails = L.tileLayer('https://tile.waymarkedtrails.org/hiking/{z}/{x}/{y}.png', {
+                    maxNativeZoom: 18,
+                    maxZoom: 18,
+                    opacity: 0.85
+                });
+
+                let switchedToFallback = false;
+                esriTiles.on('tileerror', () => {
+                    if (!switchedToFallback) {
+                        switchedToFallback = true;
+                        map.removeLayer(esriTiles);
+                        topoFallbackTiles.addTo(map);
+                        hikingTrails.bringToFront();
+                    }
+                });
+
+                esriTiles.addTo(map);
+                hikingTrails.addTo(map);
+
+                const nordicPinIcon = L.divIcon({
+                    className: 'ostruzna-gps-pin',
+                    html: `
+                        <div style="display: flex; align-items: center; gap: 10px; pointer-events: auto;">
+                            <div style="position: relative; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                <span style="position: absolute; width: 34px; height: 34px; border-radius: 50%; background: rgba(184, 58, 51, 0.25);"></span>
+                                <span style="position: relative; width: 16px; height: 16px; border-radius: 50%; background: #B83A33; border: 2.5px solid #F5F2EB; box-shadow: 0 3px 10px rgba(0,0,0,0.38);"></span>
+                            </div>
+                            <div style="background: #2D4234; color: #F5F2EB; padding: 7px 12px; border: 1px solid rgba(255,255,255,0.18); box-shadow: 0 6px 18px rgba(0,0,0,0.24); white-space: nowrap;">
+                                <div style="font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-size: 16px; line-height: 1.15; color: #F5F2EB;">Wellness chata Relax</div>
+                                <div style="font-size: 9px; text-transform: uppercase; letter-spacing: 0.16em; color: #D8D6D0; margin-top: 2px; font-weight: 600;">Ostružná 82 • 720 m n. m.</div>
+                            </div>
+                        </div>
+                    `,
+                    iconSize: [240, 44],
+                    iconAnchor: [17, 22]
+                });
+
+                L.marker(ostruznaCoords, { icon: nordicPinIcon }).addTo(map);
+
+                const recenterMap = () => {
+                    map.invalidateSize();
+                    map.setView(ostruznaCoords, 14, { animate: false });
+                };
+                setTimeout(recenterMap, 150);
+                window.addEventListener('load', recenterMap);
+                if ('ResizeObserver' in window) {
+                    new ResizeObserver(recenterMap).observe(mapEl);
+                }
+            } else if (mapEl) {
+                // Záloha: knihovna Leaflet se nenačetla -> vložená mapa OpenStreetMap se stejnou polohou
+                const fbLat = 50.1783, fbLon = 17.0481, fbD = 0.02;
+                mapEl.innerHTML = `<iframe title="Mapa – Wellness chata Relax, Ostružná 82" class="w-full h-full border-0" loading="lazy" src="https://www.openstreetmap.org/export/embed.html?bbox=${fbLon - fbD}%2C${fbLat - fbD / 2}%2C${fbLon + fbD}%2C${fbLat + fbD / 2}&amp;layer=mapnik&amp;marker=${fbLat}%2C${fbLon}"></iframe>`;
+            }
+        });
+    </script>
+</body>
+</html>

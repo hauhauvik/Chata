@@ -42,6 +42,10 @@
     </script>
 
     <style>
+        /* Ochrana proti horizontálnímu přetečení na malých displejích bez rozbití sticky hlavičky */
+        body {
+            overflow-x: clip;
+        }
         /* Severské barevné sladění pouze na vrstvu mapových dlaždic (pin zůstává nedotčený) */
         .nordic-leaflet-map .leaflet-tile-pane {
             filter: sepia(0.12) saturate(0.9) contrast(0.98) brightness(1.02);
@@ -85,24 +89,24 @@
 <body class="bg-sandstone text-slateDark font-sans antialiased selection:bg-moss selection:text-sandstone">
 
     <!-- 1. HEADER S LOGEM -->
-    <header class="sticky top-0 z-40 bg-sandstone/95 backdrop-blur-md border-b border-hairline">
-        <div class="max-w-[1440px] mx-auto px-6 lg:px-12">
-            <div class="flex justify-between items-center h-20">
+    <header class="sticky top-0 z-40 w-full bg-sandstone/95 backdrop-blur-md border-b border-hairline">
+        <div class="max-w-[1440px] mx-auto px-3 sm:px-6 lg:px-12">
+            <div class="flex justify-between items-center gap-1.5 sm:gap-4 h-16 sm:h-20">
                 
-                <!-- Logo v fixním rámečku w-10 h-10 -->
-                <a href="#" class="flex items-center gap-3.5 group">
-                    <div class="w-10 h-10 border border-slateDark/25 flex items-center justify-center bg-white group-hover:border-oak transition-colors shrink-0 overflow-hidden">
+                <!-- Logo v fixním rámečku -->
+                <a href="#" class="flex items-center gap-2 sm:gap-3.5 group min-w-0">
+                    <div class="w-8 h-8 sm:w-10 sm:h-10 border border-slateDark/25 flex items-center justify-center bg-white group-hover:border-oak transition-colors shrink-0 overflow-hidden">
                         <img 
                             src="img/logo.webp" 
                             alt="Logo Wellness chata Relax" 
                             class="w-full h-full object-contain p-1"
                         >
                     </div>
-                    <div>
-                        <span class="font-serif text-xl sm:text-2xl tracking-tight text-slateDark font-medium block leading-none">
+                    <div class="min-w-0">
+                        <span class="font-serif text-[15px] min-[375px]:text-lg sm:text-2xl tracking-tight text-slateDark font-medium block leading-none whitespace-nowrap">
                             RELAX <span class="italic font-normal text-oak">Ostružná</span>
                         </span>
-                        <span class="text-[9px] uppercase tracking-[0.26em] text-slateDark/55 block mt-1">
+                        <span class="text-[7.5px] min-[375px]:text-[8.5px] sm:text-[9px] uppercase tracking-[0.14em] min-[375px]:tracking-[0.2em] sm:tracking-[0.26em] text-slateDark/55 block mt-0.5 sm:mt-1 whitespace-nowrap">
                             Wellness Chata
                         </span>
                     </div>
@@ -118,15 +122,15 @@
                 </nav>
 
                 <!-- Pravé CTA -->
-                <div class="flex items-center gap-5">
+                <div class="flex items-center gap-1 sm:gap-5 shrink-0">
                     <a href="tel:+420775753033" class="hidden xl:inline-block text-xs tracking-[0.12em] text-slateDark/70 hover:text-slateDark transition-colors">
                         +420 775 753 033
                     </a>
-                    <a href="#rezervace" class="bg-slateDark hover:bg-moss text-sandstone text-xs uppercase tracking-[0.18em] font-medium px-6 py-3.5 transition-colors">
+                    <a href="#rezervace" class="w-auto min-w-0 bg-slateDark hover:bg-moss text-sandstone text-[9px] min-[375px]:text-[10px] sm:text-xs uppercase tracking-[0.04em] min-[375px]:tracking-[0.08em] sm:tracking-[0.18em] font-medium px-2 py-1.5 min-[375px]:px-3 min-[375px]:py-2 sm:px-6 sm:py-3.5 transition-colors whitespace-nowrap">
                         Ověřit termín
                     </a>
-                    <button id="mobile-menu-btn" type="button" class="lg:hidden p-2 text-slateDark" aria-label="Menu">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                    <button id="mobile-menu-btn" type="button" class="lg:hidden p-1 sm:p-2 text-slateDark shrink-0" aria-label="Menu">
+                        <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                             <path stroke-linecap="square" d="M3 7h18M3 12h18M3 17h18"/>
                         </svg>
                     </button>
@@ -364,28 +368,28 @@
         <div class="max-w-[1440px] mx-auto px-6 lg:px-12">
             
             <!-- Záhlaví + Přepínací záložky kategorií -->
-            <div class="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-14">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 md:gap-8 mb-14">
                 <div>
                     <span class="text-[11px] uppercase tracking-[0.22em] text-oak block mb-3">Fotogalerie</span>
                     <h2 class="font-serif text-4xl sm:text-5xl text-slateDark font-normal">Pohled do chaty</h2>
                 </div>
 
                 <!-- Kategorie: Exteriér / Venek (výchozí), Interiér, Wellness -->
-                <div class="flex flex-wrap border border-hairline bg-sandstone" id="gallery-filters">
-                    <button type="button" data-category="exterier" class="gal-filter active px-6 py-3 text-xs uppercase tracking-[0.16em] bg-slateDark text-sandstone transition-colors">
+                <div class="inline-flex flex-wrap items-center gap-1.5 sm:gap-0 sm:border sm:border-hairline sm:bg-sandstone w-auto" id="gallery-filters">
+                    <button type="button" data-category="exterier" class="gal-filter active flex-none w-auto px-2.5 py-2 sm:px-6 sm:py-3 text-[10px] min-[375px]:text-[11px] sm:text-xs uppercase tracking-[0.05em] sm:tracking-[0.16em] whitespace-nowrap border border-hairline sm:border-0 bg-slateDark text-sandstone transition-colors">
                         Exteriér / Venek
                     </button>
-                    <button type="button" data-category="interier" class="gal-filter px-6 py-3 text-xs uppercase tracking-[0.16em] text-slateDark hover:bg-sandstoneAlt transition-colors border-l border-hairline">
+                    <button type="button" data-category="interier" class="gal-filter flex-none w-auto px-2.5 py-2 sm:px-6 sm:py-3 text-[10px] min-[375px]:text-[11px] sm:text-xs uppercase tracking-[0.05em] sm:tracking-[0.16em] whitespace-nowrap border border-hairline sm:border-0 sm:border-l sm:border-hairline bg-sandstone text-slateDark hover:bg-sandstoneAlt transition-colors">
                         Interiér
                     </button>
-                    <button type="button" data-category="wellness" class="gal-filter px-6 py-3 text-xs uppercase tracking-[0.16em] text-slateDark hover:bg-sandstoneAlt transition-colors border-l border-hairline">
+                    <button type="button" data-category="wellness" class="gal-filter flex-none w-auto px-2.5 py-2 sm:px-6 sm:py-3 text-[10px] min-[375px]:text-[11px] sm:text-xs uppercase tracking-[0.05em] sm:tracking-[0.16em] whitespace-nowrap border border-hairline sm:border-0 sm:border-l sm:border-hairline bg-sandstone text-slateDark hover:bg-sandstoneAlt transition-colors">
                         Wellness
                     </button>
                 </div>
             </div>
 
-            <!-- Dynamický Bento Grid (6 fotek na kategorii, pokaždé jiná pozice hlavní fotky) -->
-            <div class="grid grid-cols-1 md:grid-cols-12 gap-5" id="gallery-grid">
+            <!-- Dynamický Bento Grid (na mobilu vše pod sebou s rozestupy, na md+ bento mřížka) -->
+            <div class="flex flex-col gap-5 md:grid md:grid-cols-12 md:gap-5" id="gallery-grid">
                 <!-- Generuje JavaScript podle aktivní kategorie -->
             </div>
         </div>
@@ -636,7 +640,7 @@
             <div class="grid grid-cols-1 lg:grid-cols-12 border border-slateDark bg-white">
                 
                 <!-- LEVÝ BLOK: Externí kalendář obsazenosti (e-chalupy.cz) -->
-                <div class="lg:col-span-6 p-6 sm:p-10 lg:p-12 lg:border-r border-slateDark bg-sandstone/40 flex flex-col justify-between">
+                <div class="lg:col-span-6 p-4 sm:p-10 lg:p-12 lg:border-r border-slateDark bg-sandstone/40 flex flex-col justify-between">
                     <div>
                         <div class="flex flex-wrap items-center justify-between gap-4 pb-6 mb-6 border-b border-hairline">
                             <div>
@@ -646,10 +650,10 @@
                                 <h3 class="font-serif text-2xl text-slateDark">Kalendář obsazenosti</h3>
                             </div>
 
-                            <div class="flex items-center border border-slateDark bg-white">
-                                <button type="button" id="cal-prev" class="px-3.5 py-2 text-xs hover:bg-slateDark hover:text-sandstone transition-colors" aria-label="Předchozí měsíc">&larr;</button>
-                                <span id="cal-title" class="px-4 py-2 text-xs uppercase tracking-[0.15em] font-medium min-w-[145px] text-center">Prosinec 2026</span>
-                                <button type="button" id="cal-next" class="px-3.5 py-2 text-xs hover:bg-slateDark hover:text-sandstone transition-colors" aria-label="Další měsíc">&rarr;</button>
+                            <div class="flex items-center border border-slateDark bg-white max-w-full">
+                                <button type="button" id="cal-prev" class="px-2.5 sm:px-3.5 py-2 text-xs hover:bg-slateDark hover:text-sandstone transition-colors" aria-label="Předchozí měsíc">&larr;</button>
+                                <span id="cal-title" class="px-2 sm:px-4 py-2 text-[11px] sm:text-xs uppercase tracking-[0.12em] sm:tracking-[0.15em] font-medium min-w-[115px] sm:min-w-[145px] text-center">Prosinec 2026</span>
+                                <button type="button" id="cal-next" class="px-2.5 sm:px-3.5 py-2 text-xs hover:bg-slateDark hover:text-sandstone transition-colors" aria-label="Další měsíc">&rarr;</button>
                             </div>
                         </div>
 
@@ -663,7 +667,7 @@
                     </div>
 
                     <div class="mt-8 pt-5 border-t border-hairline flex flex-wrap items-center justify-between gap-4 text-[11px] uppercase tracking-[0.14em] text-slateDark/70">
-                        <div class="flex items-center gap-5">
+                        <div class="flex flex-wrap items-center gap-4 sm:gap-5">
                             <span class="inline-flex items-center gap-2">
                                 <span class="w-3 h-3 bg-white border border-slateDark"></span> Volno
                             </span>
@@ -679,7 +683,7 @@
                 </div>
 
                 <!-- PRAVÝ BLOK: Poptávkový formulář -->
-                <div class="lg:col-span-6 p-6 sm:p-10 lg:p-12">
+                <div class="lg:col-span-6 p-4 sm:p-10 lg:p-12">
                     <h3 class="font-serif text-2xl text-slateDark mb-2">Nezávazná poptávka pobytu</h3>
                     <p class="text-xs text-slateDark/60 mb-8">Odpovídáme obratem s přesnou kalkulací bez zprostředkovatelských provizí.</p>
 
@@ -773,7 +777,7 @@
                         </div>
                     </dl>
 
-                    <a href="https://www.google.com/maps/search/?api=1&query=Wellness+chata+Relax+Ostruzna+82" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-slateDark border-b border-slateDark pb-1.5 hover:text-oak hover:border-oak transition-colors">
+                    <a href="https://www.google.com/maps/search/?api=1&query=50.18344,17.05352" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-slateDark border-b border-slateDark pb-1.5 hover:text-oak hover:border-oak transition-colors">
                         Naplánovat trasu v Google Mapách <span>&nearr;</span>
                     </a>
                 </div>
@@ -785,7 +789,7 @@
                         <div id="ostruzna-nordic-map" class="w-full h-full z-10"></div>
 
                         <!-- Plovoucí tlačítko do Google Map vpravo dole -->
-                        <a href="https://www.google.com/maps/search/?api=1&query=Wellness+chata+Relax+Ostruzna+82" target="_blank" rel="noopener noreferrer" class="absolute bottom-4 right-4 z-20 bg-[#2D4234] hover:bg-[#3E5641] text-sandstone text-[11px] uppercase tracking-[0.18em] font-medium px-5 py-3 border border-white/15 transition-colors shadow-md">
+                        <a href="https://www.google.com/maps/search/?api=1&query=50.18344,17.05352" target="_blank" rel="noopener noreferrer" class="absolute bottom-4 right-4 z-20 bg-[#2D4234] hover:bg-[#3E5641] text-sandstone text-[11px] uppercase tracking-[0.18em] font-medium px-5 py-3 border border-white/15 transition-colors shadow-md">
                             Otevřít v Google Mapách &nearr;
                         </a>
                     </div>
@@ -795,7 +799,7 @@
     </section>
 
     <!-- 9. ARCHITEKTONICKÝ TMAVÝ FOOTER -->
-    <footer class="bg-slateDark text-sandstone/80 pt-20 pb-12">
+    <footer class="w-full bg-slateDark text-sandstone/80 pt-20 pb-12">
         <div class="max-w-[1440px] mx-auto px-6 lg:px-12">
             <div class="grid grid-cols-1 md:grid-cols-12 gap-12 pb-16 border-b border-white/15">
                 
@@ -837,9 +841,9 @@
                 </div>
             </div>
 
-            <div class="pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-[11px] uppercase tracking-[0.16em] text-sandstone/45">
+            <div class="pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-[11px] uppercase tracking-[0.16em] text-sandstone/45 text-center sm:text-left">
                 <span>&copy; 2026 Wellness chata Relax — Ostružná</span>
-                <span>Připraveno pro WordPress • Napojení na e-chalupy.cz</span>
+                <span>Návrh a tvorba webu: Vojtěch Hauner</span>
             </div>
         </div>
     </footer>
@@ -869,13 +873,13 @@
                 link.addEventListener('click', () => mobileMenu.classList.add('hidden'));
             });
 
-            // 2. Kategorie galerie (6 lokálních fotek .webp v každé kategorii, fixní Bento mřížka bez bílých mezer)
+            // 2. Kategorie galerie (6 lokálních fotek .webp v každé kategorii; na mobilu vše pod sebou, na md+ bento mřížka)
             const galleryData = {
                 exterier: [
                     {
                         src: 'img/exterier-1.webp',
                         caption: 'Celkový pohled na chatu se zahradou, krytou terasou a parkováním',
-                        gridClass: 'md:col-span-8 md:col-start-1 md:row-start-1 md:row-span-2 aspect-[16/11] md:aspect-auto md:h-full'
+                        gridClass: 'md:col-span-8 md:col-start-1 md:row-start-1 md:row-span-2 aspect-[4/3] md:aspect-auto md:h-full'
                     },
                     {
                         src: 'img/exterier-2.webp',
@@ -917,7 +921,7 @@
                     {
                         src: 'img/interier-3.webp',
                         caption: 'Světlá ložnice z masivního dřeva s manželskou postelí a výhledem',
-                        gridClass: 'md:col-span-8 md:col-start-5 md:row-start-1 md:row-span-2 aspect-[16/11] md:aspect-auto md:min-h-[540px]'
+                        gridClass: 'md:col-span-8 md:col-start-5 md:row-start-1 md:row-span-2 aspect-[4/3] md:aspect-auto md:min-h-[540px]'
                     },
                     {
                         src: 'img/interier-4.webp',
@@ -954,7 +958,7 @@
                     {
                         src: 'img/wellness-4.webp',
                         caption: 'Ochlazovací bazének a sprcha v mozaikovém obkladu',
-                        gridClass: 'md:col-span-8 md:row-span-2 aspect-[16/11] md:aspect-auto md:min-h-[540px]'
+                        gridClass: 'md:col-span-8 md:row-span-2 aspect-[4/3] md:aspect-auto md:min-h-[540px]'
                     },
                     {
                         src: 'img/wellness-5.webp',
@@ -988,13 +992,15 @@
 
                 items.forEach((item) => {
                     const card = document.createElement('div');
-                    card.className = `gal-item ${item.gridClass} group relative overflow-hidden border border-hairline bg-slateDark cursor-pointer`;
+                    card.className = `gal-item ${item.gridClass} group relative overflow-hidden border border-hairline rounded-[2px] bg-white p-1.5 md:p-0 md:bg-slateDark cursor-pointer`;
                     card.innerHTML = `
-                        <img src="${item.src}" alt="${item.caption}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
-                        <div class="absolute inset-0 bg-slateDark/0 group-hover:bg-slateDark/30 transition-colors flex items-end p-5">
-                            <span class="bg-sandstone/95 px-3.5 py-1.5 text-[10px] uppercase tracking-[0.16em] text-slateDark opacity-0 group-hover:opacity-100 transition-opacity">
-                                ${item.caption}
-                            </span>
+                        <div class="relative w-full h-full overflow-hidden bg-slateDark">
+                            <img src="${item.src}" alt="${item.caption}" class="w-full h-full object-cover md:group-hover:scale-105 transition-transform duration-700">
+                            <div class="hidden md:flex absolute inset-0 bg-slateDark/0 group-hover:bg-slateDark/30 transition-colors items-end p-5">
+                                <span class="bg-sandstone/95 px-3.5 py-1.5 text-[10px] uppercase tracking-[0.16em] text-slateDark opacity-0 group-hover:opacity-100 transition-opacity">
+                                    ${item.caption}
+                                </span>
+                            </div>
                         </div>
                     `;
 
@@ -1018,10 +1024,10 @@
 
                     filterBtns.forEach(b => {
                         b.classList.remove('bg-slateDark', 'text-sandstone', 'active');
-                        b.classList.add('text-slateDark');
+                        b.classList.add('bg-sandstone', 'text-slateDark');
                     });
                     btn.classList.add('bg-slateDark', 'text-sandstone', 'active');
-                    btn.classList.remove('text-slateDark');
+                    btn.classList.remove('bg-sandstone', 'text-slateDark');
 
                     renderGallery(category);
                 });
@@ -1101,9 +1107,6 @@
             const inputTo = document.getElementById('in-to');
             const inputNote = document.getElementById('in-note');
             const inputGuests = document.getElementById('in-guests');
-            const inputName = document.getElementById('in-name');
-            const inputEmail = document.getElementById('in-email');
-            const inputPhone = document.getElementById('in-phone');
             const reservationSection = document.getElementById('rezervace');
 
             const ISO_RE = /^\d{4}-\d{2}-\d{2}$/;
@@ -1113,22 +1116,18 @@
             const now = new Date();
             const todayIso = toIso(now.getFullYear(), now.getMonth(), now.getDate());
             const firstViewMonth = now.getFullYear() * 12 + now.getMonth();
-            let viewIndex = Math.max(firstViewMonth, 2026 * 12 + 11); // rok * 12 + měsíc (0–11); ukázka se otevře na prosinci 2026
+            let viewIndex = Math.max(firstViewMonth, 2026 * 12 + 11);
 
-            // Rezervace ze serveru: [{ from: 'RRRR-MM-DD', to: 'RRRR-MM-DD', status: 'confirmed' | 'pending' }]
-            // "from" = den příjezdu, "to" = den odjezdu (v den odjezdu může jiný host přijet).
             let bookings = [];
-            let availabilityState = 'loading'; // loading | ready | error
+            let availabilityState = 'loading';
 
             inputFrom.min = todayIso;
             inputTo.min = todayIso;
 
-            // Překryv s POTVRZENOU rezervací (odjezd ve stejný den jako příjezd jiného hosta překryv není)
             function hasConflict(fromIso, toIso) {
                 return bookings.some((b) => b.status === 'confirmed' && b.from < toIso && b.to > fromIso);
             }
 
-            // Stav noci začínající daným dnem
             function nightStatus(iso) {
                 let pending = false;
                 for (const b of bookings) {
@@ -1182,9 +1181,9 @@
                 const f = inputFrom.value;
                 const t = inputTo.value;
                 if (ISO_RE.test(f) && !t && iso > f && !hasConflict(f, iso)) {
-                    inputTo.value = iso;      // druhý klik = odjezd
+                    inputTo.value = iso;
                 } else {
-                    inputFrom.value = iso;    // první klik = příjezd (nebo nový výběr)
+                    inputFrom.value = iso;
                     inputTo.value = '';
                 }
                 hideMessages();
@@ -1225,7 +1224,7 @@
                     return;
                 }
 
-                const offset = (new Date(year, month, 1).getDay() + 6) % 7; // pondělí = 0
+                const offset = (new Date(year, month, 1).getDay() + 6) % 7;
                 const daysInMonth = new Date(year, month + 1, 0).getDate();
 
                 const f = ISO_RE.test(inputFrom.value) ? inputFrom.value : '';
@@ -1282,8 +1281,6 @@
                 }
             }
 
-            // UKÁZKOVÁ DATA pro návrh. Ve finální verzi je nahradí kalendář z e-chalupy.cz (embed),
-            // který majitel spravuje externě. "to" = den odjezdu.
             const DEMO_BOOKINGS = [
                 { from: '2026-12-04', to: '2026-12-07', status: 'confirmed' },
                 { from: '2026-12-11', to: '2026-12-14', status: 'pending' },
@@ -1313,7 +1310,6 @@
                 drawCalendar();
             });
 
-            // Ruční zadání data do polí formuláře se propíše do kalendáře i do validace
             inputFrom.addEventListener('change', () => {
                 showMonthOf(inputFrom.value);
                 syncAfterDateChange();
@@ -1331,7 +1327,6 @@
                     const dateTo = btn.getAttribute('data-to') || '';
                     const packageName = btn.getAttribute('data-package') || '';
 
-                    // Hodnoty se při každém kliknutí přepíšou podle aktuálně vybraného balíčku (uživatel je může dál upravit)
                     inputFrom.value = dateFrom;
                     inputTo.value = dateTo;
                     if (packageName) {
@@ -1359,7 +1354,7 @@
                 });
             });
 
-            // 6. Odeslání formuláře (v návrhu pouze zobrazí potvrzení – nic se neodesílá)
+            // 6. Odeslání formuláře
             inquiryForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 hideMessages();
@@ -1379,21 +1374,17 @@
 
             loadAvailability();
 
-            // 7. Inicializace Leaflet.js mapy s reálným GPS markerem na Ostružná 82 [50.1783, 17.0481]
+            // 7. Inicializace Leaflet.js mapy s reálným GPS markerem na Ostružná 82 [50.18344, 17.05352]
             const mapEl = document.getElementById('ostruzna-nordic-map');
             if (mapEl && typeof L !== 'undefined') {
-                const ostruznaCoords = [50.1783, 17.0481];
+                const ostruznaCoords = [50.18344, 17.05352];
                 const map = L.map('ostruzna-nordic-map', {
                     center: ostruznaCoords,
-                    zoom: 14,
+                    zoom: 15,
                     scrollWheelZoom: true,
                     attributionControl: false
                 });
 
-                // Turistická (topografická) mapa bez API klíče: vrstevnice, lesy, cesty, kóty.
-                // Primárně Esri World Topo, záloha OpenTopoMap (přepne se při chybě sítě).
-                // Navrch značené turistické trasy (červená, modrá, zelená, žlutá) z Waymarked Trails.
-                // Pro ostrý provoz doporučeno použít službu s vlastním bezplatným klíčem (např. Mapy.cz nebo MapTiler Outdoor).
                 const esriTiles = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
                     maxNativeZoom: 17,
                     maxZoom: 18
@@ -1445,7 +1436,7 @@
 
                 const recenterMap = () => {
                     map.invalidateSize();
-                    map.setView(ostruznaCoords, 14, { animate: false });
+                    map.setView(ostruznaCoords, 15, { animate: false });
                 };
                 setTimeout(recenterMap, 150);
                 window.addEventListener('load', recenterMap);
@@ -1453,8 +1444,7 @@
                     new ResizeObserver(recenterMap).observe(mapEl);
                 }
             } else if (mapEl) {
-                // Záloha: knihovna Leaflet se nenačetla -> vložená mapa OpenStreetMap se stejnou polohou
-                const fbLat = 50.1783, fbLon = 17.0481, fbD = 0.02;
+                const fbLat = 50.18344, fbLon = 17.05352, fbD = 0.02;
                 mapEl.innerHTML = `<iframe title="Mapa – Wellness chata Relax, Ostružná 82" class="w-full h-full border-0" loading="lazy" src="https://www.openstreetmap.org/export/embed.html?bbox=${fbLon - fbD}%2C${fbLat - fbD / 2}%2C${fbLon + fbD}%2C${fbLat + fbD / 2}&amp;layer=mapnik&amp;marker=${fbLat}%2C${fbLon}"></iframe>`;
             }
         });
